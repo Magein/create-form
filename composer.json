@@ -15,7 +15,7 @@
   },
   "autoload": {
     "psr-4": {
-      "Magein\\createForm\\": "library/"
+      "Magein\\createForm\\library\\": "library/"
     },
     "files": []
   }
