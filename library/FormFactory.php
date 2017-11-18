@@ -58,7 +58,7 @@ class FormFactory
     {
         $config = json_decode($config, true);
 
-        if (empty($config)) {
+        if (empty($config) || !is_array($config)) {
             return [];
         }
 
