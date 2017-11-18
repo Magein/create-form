@@ -11,7 +11,7 @@ spl_autoload_register(function ($class) {
     }
 });
 
-use Magein\createform\library\FormFactory;
+use Magein\createForm\library\FormFactory;
 
 // 一个json类型表单配置项
 $formConfig = json_encode(getOption(), JSON_UNESCAPED_UNICODE);
@@ -45,7 +45,7 @@ if (null === $formData) {
 
 
 // 获取formData的值，得到表单项的 [name=>value] 的数组
-$result = $formFactory->transFormData($formData);
+$result = $formFactory->getFormData($formData);
 var_dump($result);
 
 /**
@@ -72,7 +72,7 @@ function formData()
  */
 function getOption()
 {
-    $username = new \Magein\createform\UserConfig();
+    $username = new \Magein\createForm\UserConfig();
     return [
         $username->toArray(),
         [

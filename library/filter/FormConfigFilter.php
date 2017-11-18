@@ -1,8 +1,8 @@
 <?php
 
-namespace Magein\createform\library\filter;
+namespace Magein\createForm\library\filter;
 
-use Magein\createform\library\constant\FormConfigTypeConstant;
+use Magein\createForm\library\constant\FormConfigTypeConstant;
 
 class FormConfigFilter extends Filter
 {

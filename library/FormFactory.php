@@ -1,14 +1,14 @@
 <?php
 
-namespace Magein\createform\library;
+namespace Magein\createForm\library;
 
-use Magein\createform\library\constant\FormConfigTypeConstant;
-use Magein\createform\library\config\CheckboxConfig;
-use Magein\createform\library\config\FileConfig;
-use Magein\createform\library\config\RadioConfig;
-use Magein\createform\library\config\SelectConfig;
-use Magein\createform\library\config\TextareaConfig;
-use Magein\createform\library\config\TextConfig;
+use Magein\createForm\library\constant\FormConfigTypeConstant;
+use Magein\createForm\library\config\CheckboxConfig;
+use Magein\createForm\library\config\FileConfig;
+use Magein\createForm\library\config\RadioConfig;
+use Magein\createForm\library\config\SelectConfig;
+use Magein\createForm\library\config\TextareaConfig;
+use Magein\createForm\library\config\TextConfig;
 
 class FormFactory
 {

@@ -1,6 +1,6 @@
 <?php
 
-namespace Magein\createform\library\filter;
+namespace Magein\createForm\library\filter;
 
 
 /**

@@ -1,6 +1,6 @@
 <?php
 
-namespace Magein\createform\library;
+namespace Magein\createForm\library;
 
 class FormError
 {

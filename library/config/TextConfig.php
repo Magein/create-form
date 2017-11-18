@@ -1,10 +1,10 @@
 <?php
 
-namespace Magein\createform\library\config;
+namespace Magein\createForm\library\config;
 
-use Magein\createform\library\constant\FormConfigTypeConstant;
-use Magein\createform\library\FormConfig;
-use Magein\createform\library\FormError;
+use Magein\createForm\library\constant\FormConfigTypeConstant;
+use Magein\createForm\library\FormConfig;
+use Magein\createForm\library\FormError;
 
 class TextConfig extends FormConfig
 {

@@ -1,9 +1,9 @@
 <?php
 
-namespace Magein\createform\library\config;
+namespace Magein\createForm\library\config;
 
-use Magein\createform\library\constant\FormConfigTypeConstant;
-use Magein\createform\library\FormConfig;
+use Magein\createForm\library\constant\FormConfigTypeConstant;
+use Magein\createForm\library\FormConfig;
 
 class RadioConfig extends FormConfig
 {

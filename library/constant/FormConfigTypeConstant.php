@@ -1,6 +1,6 @@
 <?php
 
-namespace Magein\createform\library\constant;
+namespace Magein\createForm\library\constant;
 
 class FormConfigTypeConstant extends Constant
 {
