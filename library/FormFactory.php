@@ -2,13 +2,14 @@
 
 namespace Magein\createForm\library;
 
-use Magein\createForm\library\constant\FormConfigTypeConstant;
 use Magein\createForm\library\config\CheckboxConfig;
 use Magein\createForm\library\config\FileConfig;
 use Magein\createForm\library\config\RadioConfig;
 use Magein\createForm\library\config\SelectConfig;
 use Magein\createForm\library\config\TextareaConfig;
 use Magein\createForm\library\config\TextConfig;
+use Magein\createForm\library\filter\Filter;
+use Magein\createForm\library\filter\FormConfigFilter;
 
 class FormFactory
 {
@@ -21,6 +22,31 @@ class FormFactory
      * @var string
      */
     private $error;
+
+    /**
+     * @var Filter
+     */
+    private $filterClass;
+
+    /**
+     * @var array
+     */
+    private $formConfigClass;
+
+    public function __construct()
+    {
+
+    }
+
+    private function initFormConfig()
+    {
+        $this->formConfigClass['textConfig'] = TextConfig::class;
+        $this->formConfigClass['radioConfig'] = RadioConfig::class;
+        $this->formConfigClass['checkboxConfig'] = CheckboxConfig::class;
+        $this->formConfigClass['selectConfig'] = SelectConfig::class;
+        $this->formConfigClass['fileConfig'] = FileConfig::class;
+        $this->formConfigClass['textareaConfig'] = TextareaConfig::class;
+    }
 
     /**
      * @param string $message
@@ -51,57 +77,101 @@ class FormFactory
     }
 
     /**
+     * @param Filter $filterClass
+     */
+    public function setFilterClass(Filter $filterClass)
+    {
+        $this->setFilterClass($filterClass);
+    }
+
+    /**
+     * @return Filter
+     */
+    public function getFilterClass()
+    {
+        return $this->filterClass;
+    }
+
+    /**
+     * @param $formConfigClass
+     * @return bool
+     */
+    public function registerFormConfig($formConfigClass)
+    {
+        /**
+         * @var $instance FormConfig
+         */
+        if ($formConfigClass) {
+            try {
+                $instance = new $formConfigClass();
+                $this->formConfigClass[$instance->getClass()] = $formConfigClass;
+            } catch (\Exception $exception) {
+
+            }
+        }
+
+        return true;
+    }
+
+    /**
      * @param $config
-     * @return array|null
+     * @return array
      */
     public function makeFormConfig($config)
     {
+        $this->error = '';
+
         $config = json_decode($config, true);
 
         if (empty($config) || !is_array($config)) {
+            $this->throwException('表单配置项json对象格式错误');
             return [];
         }
+
+        $filterClass = null;
+        if ($this->filterClass) {
+            $filterClass = new $this->filterClass();
+        }
+
+        $this->initFormConfig();
+
+        $this->filterClass = FormConfigFilter::class;
 
         $formConfig = [];
 
         foreach ($config as $item) {
-            $type = isset($item['type']) ? $item['type'] : null;
-            switch ($type) {
-                case FormConfigTypeConstant::TYPE_TEXT:
-                    $instance = new TextConfig();
-                    break;
-                case FormConfigTypeConstant::TYPE_RADIO:
-                    $instance = new RadioConfig();
-                    break;
-                case FormConfigTypeConstant::TYPE_CHECKBOX:
-                    $instance = new CheckboxConfig();
-                    break;
-                case FormConfigTypeConstant::TYPE_SELECT:
-                    $instance = new SelectConfig();
-                    break;
-                case FormConfigTypeConstant::TYPE_TEXTAREA:
-                    $instance = new TextareaConfig();
-                    break;
-                case FormConfigTypeConstant::TYPE_FILE:
-                    $instance = new FileConfig();
-                    break;
-                default:
-                    $instance = [];
+
+            if (!is_array($item)) {
+                $this->throwException('表单配置项类型错误!');
+                return [];
             }
 
             $title = isset($item['title']) ? $item['title'] : null;
+            $class = isset($item['class']) ? $item['class'] : null;
 
-            if (!$instance) {
-                $this->throwException('表单配置项类型错误,请检查type属性是否正确,配置项标题：' . $title);
-                return null;
+            if (!$class || !isset($this->formConfigClass[$class])) {
+                $this->throwException('表单配置项类型错误,请检查属性是否正确,配置项标题：' . $title);
+                return [];
             }
 
-            if (!$instance->init($item)) {
+            /**
+             * @var FormConfig $instance
+             */
+            $class = $this->formConfigClass[$class];
+
+            $instance = new $class();
+
+            if (!$instance->init($item, $filterClass)) {
                 $this->throwException('表单配置项初始化失败,请检查属性是否缺少,配置项标题：' . $title);
-                return null;
+                return [];
             };
 
             $formConfig[$instance->getName()] = $instance;
+        }
+
+        if (count($formConfig) !== count($config)) {
+            $this->setError('表单创建失败');
+            return [];
         }
 
         return $formConfig;
@@ -117,20 +187,22 @@ class FormFactory
             return [];
         }
 
+        $result = [];
+
         if ($formConfig && is_array($formConfig)) {
             /**
              * @var $item FormConfig
              */
             foreach ($formConfig as $key => $config) {
                 try {
-                    $formConfig[$key] = $config->toArray();
+                    $result[] = $config->toArray();
                 } catch (\Exception $exception) {
                     return [];
                 }
             }
         }
 
-        return $formConfig;
+        return $result;
     }
 
     /**
@@ -145,7 +217,7 @@ class FormFactory
             return null;
         }
 
-        return json_encode($formConfig, JSON_UNESCAPED_UNICODE);
+        return json_encode(array_values($formConfig), JSON_UNESCAPED_UNICODE);
     }
 
     /**
@@ -168,7 +240,8 @@ class FormFactory
                     $value = isset($formData[$config->getName()]) ? $formData[$config->getName()] : null;
                     $result = $config->setValue($value);
                     if (false === $result) {
-                        $this->setError($config->getPlaceholder());
+                        $error = $config->getPlaceholder() ?: $config->getTitle() . '不能为空';
+                        $this->setError($error);
                         return [];
                     }
                     $formConfig[$key] = $config;

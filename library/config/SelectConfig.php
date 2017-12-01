@@ -3,6 +3,8 @@
 namespace Magein\createForm\library\config;
 
 use Magein\createForm\library\constant\FormConfigTypeConstant;
+use Magein\createForm\library\filter\Filter;
+use Magein\createForm\library\filter\FormConfigFilter;
 use Magein\createForm\library\FormConfig;
 
 class SelectConfig extends FormConfig
@@ -36,13 +38,17 @@ class SelectConfig extends FormConfig
 
     /**
      * @param array $data
-     * @return bool
+     * @param Filter|null $filter
+     * @return mixed
      */
-    public function init(array $data)
+    public function init(array $data, Filter $filter = null)
     {
-        parent::init($data);
+        parent::init($data, $filter);
 
-        return $this->checkOptions($this->options);
+        $formConfigFilter = new FormConfigFilter();
+
+        return $formConfigFilter->options($this->options);
+
     }
 
     /**
@@ -59,7 +65,12 @@ class SelectConfig extends FormConfig
                 return false;
             }
 
-            if (in_array($value, $this->options)) {
+            $names = [];
+            foreach ($this->options as $option) {
+                $names[] = $option['name'];
+            }
+
+            if (!in_array($this->value, $names)) {
                 return false;
             }
         }

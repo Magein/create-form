@@ -21,19 +21,4 @@ class TextConfig extends FormConfig
     {
         parent::__construct($data);
     }
-
-    /**
-     * @param string $value
-     * @return bool
-     */
-    public function setValue($value)
-    {
-        parent::setValue($value);
-
-        if (!is_string($this->value) && !is_int($this->value)) {
-            return false;
-        }
-
-        return true;
-    }
 }

@@ -2,8 +2,11 @@
 
 namespace Magein\createForm\library;
 
+use Magein\createForm\library\filter\Filter;
+
 class FormConfig
 {
+    protected $class;
     /**
      * @var string
      */
@@ -32,12 +35,17 @@ class FormConfig
     /**
      * @var array
      */
-    protected $length = [1, 255];
+    protected $length = [0, 0];
 
     /**
      * @var string|array
      */
     protected $value = '';
+
+    /**
+     * @var bool
+     */
+    protected $disabled = false;
 
     /**
      * FormItemConfig constructor.
@@ -48,33 +56,65 @@ class FormConfig
         if ($data) {
             $this->init($data);
         }
+
+        $this->setClass();
+    }
+
+    /**
+     * @return bool
+     */
+    public function setClass()
+    {
+        $class = preg_replace('/\\\/', '/', get_class($this));
+        $class = explode('/', $class);
+        $this->class = end($class);
+        return true;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getClass()
+    {
+        return $this->class;
     }
 
     /**
      * @param array $data
+     * @param Filter|null $filter
      * @return bool
      */
-    public function init(array $data)
+    public function init(array $data, Filter $filter = null)
     {
         if (empty($data)) {
             return false;
         }
 
+        if (empty($data['name'])) {
+            $data['name'] = 'e' . rand(100, 999) . 'n' . rand(100, 999);
+        }
+
         $properties = $this->getProperties(true);
-        foreach ($properties as $property) {
-            $this->$property = isset($data[$property]) ? $data[$property] : null;
-        }
 
-        if (empty($this->title)) {
-            return false;
-        }
+        if ($filter) {
+            foreach ($properties as $property) {
 
-        if (empty($this->name)) {
-            return false;
-        }
+                $param = isset($data[$property]) ? $data[$property] : null;
+                if ($param) {
 
-        if (empty($this->required)) {
-            $this->required = 1;
+                    if (method_exists($filter, $property)) {
+                        if (!call_user_func([$filter, $property], $param)) {
+                            return false;
+                        }
+                    }
+
+                    $this->$property = $param;
+                }
+            }
+        } else {
+            foreach ($properties as $property) {
+                $this->$property = isset($data[$property]) ? $data[$property] : null;
+            }
         }
 
         return true;
@@ -129,30 +169,41 @@ class FormConfig
     }
 
     /**
+     * @return bool
+     */
+    public function getDisabled()
+    {
+        return $this->disabled;
+    }
+
+    /**
      * @param string $value
      * @return bool
      */
     public function setValue($value)
     {
-
         // 去除前后空格以及过滤html标签
         if (is_string($value)) {
             $value = strip_tags(trim($value));
         }
 
         // 请注意0值
-        if (intval($this->required) && null === $value) {
+        if (intval($this->required) && ($value === null || $value === '')) {
             return false;
         }
 
         // 值不为空则验证长度
-        if (null !== $value) {
-            if (is_string($value) || is_int($value)) {
-                $minLength = isset($this->length[0]) ? $this->length[0] : 1;
-                $maxLength = isset($this->length[1]) ? $this->length[1] : 255;
-                $length = mb_strlen($value);
-                if ($minLength > $length || $maxLength < $length) {
-                    return false;
+        if (is_string($value) || is_int($value)) {
+            if (null !== $value && $value !== '') {
+                if (is_string($value) || is_int($value)) {
+                    $minLength = isset($this->length[0]) ? $this->length[0] : 0;
+                    $maxLength = isset($this->length[1]) ? $this->length[1] : 0;
+                    if ($minLength && $maxLength) {
+                        $length = mb_strlen($value);
+                        if ($minLength > $length || $maxLength < $length) {
+                            return false;
+                        }
+                    }
                 }
             }
         }
@@ -164,7 +215,7 @@ class FormConfig
 
     /**
      * @param bool $toArray
-     * @return \ReflectionProperty[]
+     * @return array
      */
     public function getProperties($toArray = false)
     {
@@ -197,6 +248,8 @@ class FormConfig
             $data[$name] = $this->$name;
         }
 
+        $this->setClass();
+
         return $data;
     }
 
@@ -206,29 +259,5 @@ class FormConfig
     public function toJson()
     {
         return json_encode($this->toArray(), JSON_UNESCAPED_UNICODE);
-    }
-
-    /**
-     * @param $options
-     * @return bool
-     */
-    protected function checkOptions($options)
-    {
-        if (empty($this->options)) {
-            return false;
-        }
-
-        if (!is_array($options)) {
-            return false;
-        }
-
-        foreach ($options as $option) {
-            if (!is_string($option) && !is_int($option)) {
-                return false;
-            }
-
-        }
-
-        return true;
     }
 }
