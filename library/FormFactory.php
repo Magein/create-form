@@ -227,10 +227,6 @@ class FormFactory
      */
     public function checkFormData(array $formData, array $formConfig)
     {
-        if (empty($formData) || empty($formConfig)) {
-            return [];
-        }
-
         foreach ($formConfig as $key => $config) {
             /**
              * @var FormConfig $config
@@ -246,8 +242,12 @@ class FormFactory
                     }
                     $formConfig[$key] = $config;
                 } catch (\Exception $exception) {
+                    $this->setError('表单项不存在' . $config->getName());
                     return [];
                 }
+            } else {
+                $this->setError('表单项不存在');
+                return [];
             }
         }
 
