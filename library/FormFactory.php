@@ -35,7 +35,7 @@ class FormFactory
 
     public function __construct()
     {
-
+        $this->initFormConfig();
     }
 
     private function initFormConfig()
@@ -132,8 +132,6 @@ class FormFactory
         if ($this->filterClass) {
             $filterClass = new $this->filterClass();
         }
-
-        $this->initFormConfig();
 
         $this->filterClass = FormConfigFilter::class;
 
