@@ -36,6 +36,7 @@ class FormFactory
     public function __construct()
     {
         $this->initFormConfig();
+        $this->setFilterClass(new FormConfigFilter());
     }
 
     private function initFormConfig()
@@ -128,13 +129,6 @@ class FormFactory
             return [];
         }
 
-        $filterClass = null;
-        if ($this->filterClass) {
-            $filterClass = new $this->filterClass();
-        }
-
-        $this->filterClass = FormConfigFilter::class;
-
         $formConfig = [];
 
         foreach ($config as $item) {
@@ -159,7 +153,7 @@ class FormFactory
 
             $instance = new $class();
 
-            if (!$instance->init($item, $filterClass)) {
+            if (!$instance->init($item, $this->filterClass)) {
                 $this->throwException('表单配置项初始化失败,请检查属性是否缺少,配置项标题：' . $title);
                 return [];
             };
