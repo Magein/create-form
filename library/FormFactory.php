@@ -82,7 +82,7 @@ class FormFactory
      */
     public function setFilterClass(Filter $filterClass)
     {
-        $this->setFilterClass($filterClass);
+        $this->filterClass = $filterClass;
     }
 
     /**
