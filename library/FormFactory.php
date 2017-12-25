@@ -105,6 +105,7 @@ class FormFactory
          */
         if ($formConfigClass) {
             try {
+                
                 $instance = new $formConfigClass();
 
                 if (null === $key) {
