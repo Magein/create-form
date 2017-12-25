@@ -95,9 +95,10 @@ class FormFactory
 
     /**
      * @param $formConfigClass
+     * @param null $key
      * @return bool
      */
-    public function registerFormConfig($formConfigClass)
+    public function registerFormConfig($formConfigClass, $key = null)
     {
         /**
          * @var $instance FormConfig
@@ -105,7 +106,13 @@ class FormFactory
         if ($formConfigClass) {
             try {
                 $instance = new $formConfigClass();
-                $this->formConfigClass[$instance->getClass()] = $formConfigClass;
+
+                if (null === $key) {
+                    $key = $instance->getClass();
+                }
+
+                $this->formConfigClass[$key] = $formConfigClass;
+
             } catch (\Exception $exception) {
 
             }
