@@ -100,7 +100,8 @@ class FormConfig
             foreach ($properties as $property) {
 
                 $param = isset($data[$property]) ? $data[$property] : null;
-                if ($param) {
+
+                if (null !== $param) {
 
                     if (method_exists($filter, $property)) {
                         if (!call_user_func([$filter, $property], $param)) {
