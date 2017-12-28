@@ -41,12 +41,12 @@ class FormFactory
 
     private function initFormConfig()
     {
-        $this->formConfigClass['textConfig'] = TextConfig::class;
-        $this->formConfigClass['radioConfig'] = RadioConfig::class;
-        $this->formConfigClass['checkboxConfig'] = CheckboxConfig::class;
-        $this->formConfigClass['selectConfig'] = SelectConfig::class;
-        $this->formConfigClass['fileConfig'] = FileConfig::class;
-        $this->formConfigClass['textareaConfig'] = TextareaConfig::class;
+        $this->formConfigClass['TextConfig'] = TextConfig::class;
+        $this->formConfigClass['RadioConfig'] = RadioConfig::class;
+        $this->formConfigClass['CheckboxConfig'] = CheckboxConfig::class;
+        $this->formConfigClass['SelectConfig'] = SelectConfig::class;
+        $this->formConfigClass['FileConfig'] = FileConfig::class;
+        $this->formConfigClass['TextareaConfig'] = TextareaConfig::class;
     }
 
     /**
@@ -105,7 +105,7 @@ class FormFactory
          */
         if ($formConfigClass) {
             try {
-                
+
                 $instance = new $formConfigClass();
 
                 if (null === $key) {
