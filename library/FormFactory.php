@@ -55,6 +55,7 @@ class FormFactory
      */
     private function throwException($message)
     {
+        $this->error = $message;
         if ($this->debug) {
             throw new \Exception($message);
         }
