@@ -3,6 +3,7 @@
 namespace Magein\createForm\library\config;
 
 use Magein\createForm\library\constant\FormConfigTypeConstant;
+use Magein\createForm\library\constant\FormErrorConstant;
 use Magein\createForm\library\filter\Filter;
 use Magein\createForm\library\filter\FormConfigFilter;
 use Magein\createForm\library\FormConfig;
@@ -53,15 +54,17 @@ class SelectConfig extends FormConfig
 
     /**
      * @param string $value
+     * @param bool $checkLength
      * @return bool
      */
-    public function setValue($value)
+    public function setValue($value, $checkLength)
     {
-        parent::setValue($value);
+        parent::setValue($value, $checkLength);
 
         if ($this->value) {
 
             if (!is_string($this->value) && !is_int($this->value)) {
+                $this->setError(FormErrorConstant::FORM_DATA_IS_STRING);
                 return false;
             }
 
@@ -71,6 +74,7 @@ class SelectConfig extends FormConfig
             }
 
             if (!in_array($this->value, $names)) {
+                $this->setError(FormErrorConstant::FORM_DATA_NOT_MATCH);
                 return false;
             }
         }

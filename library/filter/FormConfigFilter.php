@@ -2,6 +2,8 @@
 
 namespace Magein\createForm\library\filter;
 
+use Magein\createForm\library\constant\FormErrorConstant;
+
 class FormConfigFilter extends Filter
 {
     /**
@@ -52,13 +54,8 @@ class FormConfigFilter extends Filter
      */
     public function options($options)
     {
-        if (empty($options)) {
-            $this->setError(__FUNCTION__ . '方法参数为空');
-            return false;
-        }
-
-        if (!is_array($options)) {
-            $this->setError(__FUNCTION__ . '方法参数不是一个数组');
+        if (empty($options) || !is_array($options)) {
+            $this->setError(FormErrorConstant::FORM_CONFIG_OPTIONS_ERROR);
             return false;
         }
 
@@ -67,7 +64,7 @@ class FormConfigFilter extends Filter
         foreach ($options as $key => $option) {
 
             if (!isset($option['name']) || !isset($option['value'])) {
-                $this->setError('没有设置选项的name或value值');
+                $this->setError(FormErrorConstant::FORM_CONFIG_OPTIONS_FORMAT_ERROR);
                 return false;
             }
 
@@ -81,7 +78,7 @@ class FormConfigFilter extends Filter
 
         # 验证name值是否有重复的
         if (count(array_unique($names)) != count($names)) {
-            $this->setError('options选项中name值重复，请检查');
+            $this->setError(FormErrorConstant::FORM_CONFIG_OPTIONS_NAME_NOT_UNIQUE);
             return false;
         }
 
@@ -99,7 +96,7 @@ class FormConfigFilter extends Filter
         }
 
         if (count($length) > 2) {
-            $this->setError('长度属性的值为数组类型');
+            $this->setError(FormErrorConstant::FORM_CONFIG_LENGTH_PARAM_ERROR);
             return false;
         }
 

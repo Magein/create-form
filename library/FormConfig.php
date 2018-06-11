@@ -2,10 +2,13 @@
 
 namespace Magein\createForm\library;
 
+use Magein\createForm\library\constant\FormErrorConstant;
 use Magein\createForm\library\filter\Filter;
 
 class FormConfig
 {
+    use FormError;
+
     protected $class;
     /**
      * @var string
@@ -33,6 +36,17 @@ class FormConfig
     protected $placeholder = '';
 
     /**
+     * @var string
+     */
+    protected $description = '';
+
+    /**
+     * 验证不通过的错误信息
+     * @var string
+     */
+    protected $message = '';
+
+    /**
      * @var array
      */
     protected $length = [0, 0];
@@ -46,11 +60,6 @@ class FormConfig
      * @var bool
      */
     protected $disabled = false;
-
-    /**
-     * @var string
-     */
-    private $error;
 
     /**
      * FormItemConfig constructor.
@@ -91,11 +100,6 @@ class FormConfig
      */
     public function init(array $data, Filter $filter = null)
     {
-        if (empty($data)) {
-            $this->error = '初始化参数为空';
-            return false;
-        }
-
         if (empty($data['name'])) {
             $data['name'] = 'e' . rand(100, 999) . 'n' . rand(100, 999);
         }
@@ -160,6 +164,22 @@ class FormConfig
     }
 
     /**
+     * @return string
+     */
+    public function getDescription()
+    {
+        return $this->description;
+    }
+
+    /**
+     * @return string
+     */
+    public function getMessage()
+    {
+        return $this->message;
+    }
+
+    /**
      * @return array
      */
     public function getLength()
@@ -185,9 +205,10 @@ class FormConfig
 
     /**
      * @param string $value
+     * @param bool $checkLength 验证长度
      * @return bool
      */
-    public function setValue($value)
+    public function setValue($value, $checkLength)
     {
         // 去除前后空格以及过滤html标签
         if (is_string($value)) {
@@ -196,24 +217,27 @@ class FormConfig
 
         // 请注意0值
         if (intval($this->required) && ($value === null || $value === '')) {
+            $this->setError(FormErrorConstant::FORM_DATA_REQUIRED);
             return false;
         }
 
-        // 值不为空则验证长度
-//        if (is_string($value) || is_int($value)) {
-//            if (null !== $value && $value !== '') {
-//                if (is_string($value) || is_int($value)) {
-//                    $minLength = isset($this->length[0]) ? $this->length[0] : 0;
-//                    $maxLength = isset($this->length[1]) ? $this->length[1] : 0;
-//                    if ($minLength && $maxLength) {
-//                        $length = mb_strlen($value);
-//                        if ($minLength > $length || $maxLength < $length) {
-//                            return false;
-//                        }
-//                    }
-//                }
-//            }
-//        }
+        if ($checkLength) {
+            if (null !== $value && $value !== '') {
+                $length = array_reduce($this->length, function ($length, $item) {
+                    $length[] = intval($item);
+                    return $length;
+                });
+                $minLength = isset($length[0]) ? $length[0] : 0;
+                $maxLength = isset($length[1]) ? $length[1] : 0;
+                if ($minLength && $maxLength) {
+                    $length = mb_strlen($value);
+                    if ($minLength > $length || $maxLength < $length) {
+                        $this->setError(FormErrorConstant::FORM_DATA_LENGTH_ERROR);
+                        return false;
+                    }
+                }
+            }
+        }
 
         $this->value = $value;
 
@@ -266,13 +290,5 @@ class FormConfig
     public function toJson()
     {
         return json_encode($this->toArray(), JSON_UNESCAPED_UNICODE);
-    }
-
-    /**
-     * @return string
-     */
-    public function getError()
-    {
-        return $this->error;
     }
 }
