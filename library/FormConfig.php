@@ -48,6 +48,11 @@ class FormConfig
     protected $disabled = false;
 
     /**
+     * @var string
+     */
+    private $error;
+
+    /**
      * FormItemConfig constructor.
      * @param array $data
      */
@@ -87,6 +92,7 @@ class FormConfig
     public function init(array $data, Filter $filter = null)
     {
         if (empty($data)) {
+            $this->error = '初始化参数为空';
             return false;
         }
 
@@ -105,10 +111,10 @@ class FormConfig
 
                     if (method_exists($filter, $property)) {
                         if (!call_user_func([$filter, $property], $param)) {
+                            $this->error = call_user_func([$filter, 'getError']);
                             return false;
                         }
                     }
-
                     $this->$property = $param;
                 }
             }
@@ -194,20 +200,20 @@ class FormConfig
         }
 
         // 值不为空则验证长度
-        if (is_string($value) || is_int($value)) {
-            if (null !== $value && $value !== '') {
-                if (is_string($value) || is_int($value)) {
-                    $minLength = isset($this->length[0]) ? $this->length[0] : 0;
-                    $maxLength = isset($this->length[1]) ? $this->length[1] : 0;
-                    if ($minLength && $maxLength) {
-                        $length = mb_strlen($value);
-                        if ($minLength > $length || $maxLength < $length) {
-                            return false;
-                        }
-                    }
-                }
-            }
-        }
+//        if (is_string($value) || is_int($value)) {
+//            if (null !== $value && $value !== '') {
+//                if (is_string($value) || is_int($value)) {
+//                    $minLength = isset($this->length[0]) ? $this->length[0] : 0;
+//                    $maxLength = isset($this->length[1]) ? $this->length[1] : 0;
+//                    if ($minLength && $maxLength) {
+//                        $length = mb_strlen($value);
+//                        if ($minLength > $length || $maxLength < $length) {
+//                            return false;
+//                        }
+//                    }
+//                }
+//            }
+//        }
 
         $this->value = $value;
 
@@ -260,5 +266,13 @@ class FormConfig
     public function toJson()
     {
         return json_encode($this->toArray(), JSON_UNESCAPED_UNICODE);
+    }
+
+    /**
+     * @return string
+     */
+    public function getError()
+    {
+        return $this->error;
     }
 }

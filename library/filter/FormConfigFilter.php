@@ -53,10 +53,12 @@ class FormConfigFilter extends Filter
     public function options($options)
     {
         if (empty($options)) {
+            $this->setError(__FUNCTION__ . '方法参数为空');
             return false;
         }
 
         if (!is_array($options)) {
+            $this->setError(__FUNCTION__ . '方法参数不是一个数组');
             return false;
         }
 
@@ -65,10 +67,7 @@ class FormConfigFilter extends Filter
         foreach ($options as $key => $option) {
 
             if (!isset($option['name']) || !isset($option['value'])) {
-                return false;
-            }
-
-            if (!isset($option['value'])) {
+                $this->setError('没有设置选项的name或value值');
                 return false;
             }
 
@@ -80,7 +79,9 @@ class FormConfigFilter extends Filter
             $names[] = $option['name'];
         }
 
+        # 验证name值是否有重复的
         if (count(array_unique($names)) != count($names)) {
+            $this->setError('options选项中name值重复，请检查');
             return false;
         }
 

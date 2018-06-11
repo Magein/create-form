@@ -163,7 +163,7 @@ class FormFactory
             $instance = new $class();
 
             if (!$instance->init($item, $this->filterClass)) {
-                $this->throwException('表单配置项初始化失败,请检查属性是否缺少,配置项标题：' . $title);
+                $this->throwException('表单配置项初始化失败,配置项标题：' . $title . ',可能的原因：' . $this->filterClass->getError());
                 return [];
             };
 
