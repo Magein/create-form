@@ -2,6 +2,8 @@
 
 namespace Magein\createForm\library\filter;
 
+use Magein\createForm\library\constant\FormErrorConstant;
+
 class FormConfigFilter extends Filter
 {
     /**
@@ -13,6 +15,7 @@ class FormConfigFilter extends Filter
         $title = $this->toString($title);
 
         if (empty($title)) {
+            $this->setError(FormErrorConstant::FORM_CONFIG_TITLE_ERROR);
             return false;
         }
 
@@ -25,8 +28,8 @@ class FormConfigFilter extends Filter
      */
     public function name($name)
     {
-
-        if (!preg_match('/[\w]+/', $name)) {
+        if (empty($name) || !preg_match('/^[\w]+$/', $name)) {
+            $this->setError(FormErrorConstant::FORM_CONFIG_NAME_ERROR);
             return false;
         }
 
@@ -43,6 +46,8 @@ class FormConfigFilter extends Filter
             return true;
         }
 
+        $this->setError(FormErrorConstant::FORM_CONFIG_REQUIRED_ERROR);
+
         return false;
     }
 
@@ -52,13 +57,8 @@ class FormConfigFilter extends Filter
      */
     public function options($options)
     {
-        if (empty($options)) {
-            $this->setError(__FUNCTION__ . '方法参数为空');
-            return false;
-        }
-
-        if (!is_array($options)) {
-            $this->setError(__FUNCTION__ . '方法参数不是一个数组');
+        if (empty($options) || !is_array($options)) {
+            $this->setError(FormErrorConstant::FORM_CONFIG_OPTIONS_ERROR);
             return false;
         }
 
@@ -67,7 +67,7 @@ class FormConfigFilter extends Filter
         foreach ($options as $key => $option) {
 
             if (!isset($option['name']) || !isset($option['value'])) {
-                $this->setError('没有设置选项的name或value值');
+                $this->setError(FormErrorConstant::FORM_CONFIG_OPTIONS_FORMAT_ERROR);
                 return false;
             }
 
@@ -81,7 +81,7 @@ class FormConfigFilter extends Filter
 
         # 验证name值是否有重复的
         if (count(array_unique($names)) != count($names)) {
-            $this->setError('options选项中name值重复，请检查');
+            $this->setError(FormErrorConstant::FORM_CONFIG_OPTIONS_NAME_NOT_UNIQUE);
             return false;
         }
 
@@ -94,12 +94,16 @@ class FormConfigFilter extends Filter
      */
     public function length($length)
     {
+        if (empty($length)) {
+            return true;
+        }
+
         if (!is_array($length)) {
             $length = json_decode($length, true);
         }
 
-        if (count($length) > 2) {
-            $this->setError('长度属性的值为数组类型');
+        if (count($length) != 2) {
+            $this->setError(FormErrorConstant::FORM_CONFIG_LENGTH_PARAM_ERROR);
             return false;
         }
 

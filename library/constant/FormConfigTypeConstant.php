@@ -15,6 +15,4 @@ class FormConfigTypeConstant extends Constant
     const TYPE_TEXTAREA = 'textarea';
 
     const TYPE_FILE = 'file';
-
-
 }
