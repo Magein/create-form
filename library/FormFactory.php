@@ -8,14 +8,20 @@ use Magein\createForm\library\config\RadioConfig;
 use Magein\createForm\library\config\SelectConfig;
 use Magein\createForm\library\config\TextareaConfig;
 use Magein\createForm\library\config\TextConfig;
-use Magein\createForm\library\constant\FormConfigClassConstant;
-use Magein\createForm\library\constant\FormErrorConstant;
 use Magein\createForm\library\filter\Filter;
 use Magein\createForm\library\filter\FormConfigFilter;
 
 class FormFactory
 {
-    use FormError;
+    /**
+     * @var bool
+     */
+    public $debug = false;
+
+    /**
+     * @var string
+     */
+    private $error;
 
     /**
      * @var Filter
@@ -27,9 +33,6 @@ class FormFactory
      */
     private $formConfigClass;
 
-    /**
-     * FormFactory constructor.
-     */
     public function __construct()
     {
         $this->initFormConfig();
@@ -38,12 +41,41 @@ class FormFactory
 
     private function initFormConfig()
     {
-        $this->formConfigClass[FormConfigClassConstant::TYPE_TEXT_CLASS] = TextConfig::class;
-        $this->formConfigClass[FormConfigClassConstant::TYPE_RADIO_CLASS] = RadioConfig::class;
-        $this->formConfigClass[FormConfigClassConstant::TYPE_CHECKBOX_CLASS] = CheckboxConfig::class;
-        $this->formConfigClass[FormConfigClassConstant::TYPE_SELECT_CLASS] = SelectConfig::class;
-        $this->formConfigClass[FormConfigClassConstant::TYPE_FILE_CLASS] = FileConfig::class;
-        $this->formConfigClass[FormConfigClassConstant::TYPE_TEXT_CLASS] = TextareaConfig::class;
+        $this->formConfigClass['TextConfig'] = TextConfig::class;
+        $this->formConfigClass['RadioConfig'] = RadioConfig::class;
+        $this->formConfigClass['CheckboxConfig'] = CheckboxConfig::class;
+        $this->formConfigClass['SelectConfig'] = SelectConfig::class;
+        $this->formConfigClass['FileConfig'] = FileConfig::class;
+        $this->formConfigClass['TextareaConfig'] = TextareaConfig::class;
+    }
+
+    /**
+     * @param string $message
+     * @throws \Exception
+     */
+    private function throwException($message)
+    {
+        $this->error = $message;
+        if ($this->debug) {
+            throw new \Exception($message);
+        }
+    }
+
+    /**
+     * @param $error
+     * @throws \Exception
+     */
+    private function setError($error)
+    {
+        $this->error = $error;
+    }
+
+    /**
+     * @return string
+     */
+    public function getError()
+    {
+        return $this->error;
     }
 
     /**
@@ -72,26 +104,26 @@ class FormFactory
         /**
          * @var $instance FormConfig
          */
-        if ($formConfigClass && $formConfigClass instanceof FormConfig) {
+        if ($formConfigClass) {
+            try {
 
-            $instance = new $formConfigClass();
+                $instance = new $formConfigClass();
 
-            if (null === $key) {
-                $key = $instance->getClass();
+                if (null === $key) {
+                    $key = $instance->getClass();
+                }
+
+                $this->formConfigClass[$key] = $formConfigClass;
+
+            } catch (\Exception $exception) {
+
             }
-
-            $this->formConfigClass[$key] = $formConfigClass;
-
-            return true;
         }
 
-        $this->setError(FormErrorConstant::REGISTER_CLASS_ILLEGAL);
-
-        return false;
+        return true;
     }
 
     /**
-     * 检测表单项的每一项配置是否正确，最后返回一个数组，数组中的每一项都是一个FormConfig对象
      * @param $config
      * @return array
      */
@@ -102,7 +134,7 @@ class FormFactory
         $config = json_decode($config, true);
 
         if (empty($config) || !is_array($config)) {
-            $this->setError(FormErrorConstant::FORM_CONFIG_DECODE_FAIL);
+            $this->throwException('表单配置项json对象格式错误');
             return [];
         }
 
@@ -110,8 +142,8 @@ class FormFactory
 
         foreach ($config as $item) {
 
-            if (!is_array($item) || empty($item)) {
-                $this->setError(FormErrorConstant::FORM_CONFIG_FORMAT_ERROR);
+            if (!is_array($item)) {
+                $this->throwException('表单配置项类型错误!');
                 return [];
             }
 
@@ -119,7 +151,7 @@ class FormFactory
             $class = isset($item['class']) ? $item['class'] : null;
 
             if (!$class || !isset($this->formConfigClass[$class])) {
-                $this->setError(FormErrorConstant::REGISTER_CLASS_ILLEGAL);
+                $this->throwException('表单配置项类型错误,请检查属性是否正确,配置项标题：' . $title);
                 return [];
             }
 
@@ -131,18 +163,22 @@ class FormFactory
             $instance = new $class();
 
             if (!$instance->init($item, $this->filterClass)) {
-                $this->setError($title . ':' . $this->filterClass->getError());
+                $this->throwException('表单配置项初始化失败,配置项标题：' . $title . ',可能的原因：' . $this->filterClass->getError());
                 return [];
             };
 
             $formConfig[$instance->getName()] = $instance;
         }
 
+        if (count($formConfig) !== count($config)) {
+            $this->setError('表单创建失败');
+            return [];
+        }
+
         return $formConfig;
     }
 
     /**
-     * 把表单项转化为数组（调用makeFormConfig()方法后的数据），数组中的每一表单项都是一个对象
      * @param array $formConfig
      * @return array
      */
@@ -156,7 +192,7 @@ class FormFactory
 
         if ($formConfig && is_array($formConfig)) {
             /**
-             * @var $config FormConfig
+             * @var $item FormConfig
              */
             foreach ($formConfig as $key => $config) {
                 try {
@@ -171,7 +207,6 @@ class FormFactory
     }
 
     /**
-     * 把表单项转化为json（调用makeFormConfig()方法后的数据），数组中的每一表单项都是一个对象
      * @param array $formConfig
      * @return null|string
      */
@@ -187,34 +222,32 @@ class FormFactory
     }
 
     /**
-     * 检测提交的表单数据是否正确
-     * @param array $formData ["name":"value","name":"value"]形式的数组，name对应的是表单配置中的每一项的name值
-     * @param array $formConfig 数组的每一项都是一个对象（调用makeFormConfig()方法后返回的数据）
-     * @param bool $checkLength
+     * @param array $formData
+     * @param array $formConfig
      * @return array
      */
-    public function checkFormData(array $formData, array $formConfig, $checkLength = false)
+    public function checkFormData(array $formData, array $formConfig)
     {
         foreach ($formConfig as $key => $config) {
             /**
              * @var FormConfig $config
              */
-            if (is_object($config) && in_array($config, $this->formConfigClass)) {
+            if (is_object($config)) {
                 try {
-                    $name = $config->getName();
-                    $value = isset($formData[$name]) ? $formData[$name] : null;
-                    $result = $config->setValue($value, $checkLength);
+                    $value = isset($formData[$config->getName()]) ? $formData[$config->getName()] : null;
+                    $result = $config->setValue($value);
                     if (false === $result) {
-                        $this->setError($config->getError());
+                        $error = $config->getPlaceholder() ?: $config->getTitle() . '不能为空';
+                        $this->setError($error);
                         return [];
                     }
                     $formConfig[$key] = $config;
                 } catch (\Exception $exception) {
-                    $this->setError(FormErrorConstant::REGISTER_CLASS_NOT_FOUND);
+                    $this->setError('表单项不存在' . $config->getName());
                     return [];
                 }
             } else {
-                $this->setError(FormErrorConstant::REGISTER_CLASS_NOT_FOUND);
+                $this->setError('表单项不存在');
                 return [];
             }
         }
@@ -223,13 +256,12 @@ class FormFactory
     }
 
     /**
-     * 获取表单配置项中的值，这里是表单项是调用checkFormData()方法后返回的数组(每一项都调用了setValue)
-     * @param array $formConfig
+     * @param array $formData
      * @return array
      */
-    public function getFormData(array $formConfig)
+    public function getFormData(array $formData)
     {
-        if (empty($formConfig)) {
+        if (empty($formData)) {
             return [];
         }
 
@@ -237,7 +269,7 @@ class FormFactory
         /**
          * @var FormConfig $item ;
          */
-        foreach ($formConfig as $item) {
+        foreach ($formData as $item) {
             if (is_object($item)) {
                 try {
                     $data[$item->getName()] = $item->getValue();
@@ -252,7 +284,6 @@ class FormFactory
     }
 
     /**
-     * 获取表单项的标题（调用了makeFormConfig后返回的数组）
      * @param array $formConfig
      * @return array
      */
