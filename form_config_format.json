@@ -1,0 +1,128 @@
+[
+  {
+    "title": "姓名",
+    "type": "text",
+    "class": "TextConfig",
+    "name": "e901n719",
+    "required": "1",
+    "value": "",
+    "placeholder": "请输入姓名",
+    "description": "请输入真实姓名",
+    "message": "姓名不能为空",
+    "disabled": false,
+    "length": [
+      1,
+      2
+    ]
+  },
+  {
+    "title": "性别",
+    "type": "radio",
+    "class": "RadioConfig",
+    "name": "e901n458",
+    "required": "1",
+    "value": "",
+    "placeholder": "",
+    "description": "",
+    "message": "",
+    "disabled": true,
+    "options": [
+      {
+        "name": "1",
+        "value": "男"
+      },
+      {
+        "name": "2",
+        "value": "女"
+      }
+    ]
+  },
+  {
+    "title": "年龄",
+    "type": "select",
+    "class": "SelectConfig",
+    "name": "e901n542",
+    "options": [
+      {
+        "name": "16",
+        "value": "16"
+      },
+      {
+        "name": "17",
+        "value": "17"
+      },
+      {
+        "name": "18",
+        "value": "18"
+      }
+    ],
+    "required": "1",
+    "value": "",
+    "placeholder": "",
+    "description": "",
+    "message": "",
+    "disabled": true
+  },
+  {
+    "title": "头像",
+    "type": "file",
+    "class": "FileConfig",
+    "name": "e741n632",
+    "required": "1",
+    "value": "",
+    "placeholder": "",
+    "description": "",
+    "message": "",
+    "disabled": true,
+    "length": [
+      1,
+      50
+    ]
+  },
+  {
+    "title": "简介",
+    "type": "textarea",
+    "class": "TextareaConfig",
+    "name": "e741n412",
+    "required": "1",
+    "value": "",
+    "placeholder": "",
+    "description": "",
+    "message": "",
+    "disabled": true,
+    "length": [
+      1,
+      50
+    ]
+  },
+  {
+    "title": "爱好",
+    "type": "checkbox",
+    "class": "CheckboxConfig",
+    "name": "e741n586",
+    "options": [
+      {
+        "name": "吃",
+        "value": "吃"
+      },
+      {
+        "name": "喝",
+        "value": "喝"
+      },
+      {
+        "name": "玩",
+        "value": "玩"
+      }
+    ],
+    "required": "1",
+    "value": "",
+    "placeholder": "",
+    "description": "",
+    "message": "",
+    "disabled": true,
+    "length": [
+      1,
+      50
+    ]
+  }
+]

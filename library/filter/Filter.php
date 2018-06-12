@@ -2,6 +2,7 @@
 
 namespace Magein\createForm\library\filter;
 
+use Magein\createForm\library\FormError;
 
 /**
  * Class Filter
@@ -9,26 +10,11 @@ namespace Magein\createForm\library\filter;
  */
 class Filter
 {
-    /**
-     * string
-     * @var string
-     */
-    private $error = '';
+    use FormError;
 
-    /**
-     * @param $error
-     */
-    protected function setError($error)
+    public function __construct()
     {
-        $this->error = $error;
-    }
-
-    /**
-     * @return string
-     */
-    public function getError()
-    {
-        return $this->error;
+        $this->initErrors();
     }
 
     /**

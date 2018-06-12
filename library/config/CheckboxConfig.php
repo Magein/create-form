@@ -3,6 +3,7 @@
 namespace Magein\createForm\library\config;
 
 use Magein\createForm\library\constant\FormConfigTypeConstant;
+use Magein\createForm\library\constant\FormErrorConstant;
 use Magein\createForm\library\filter\Filter;
 use Magein\createForm\library\filter\FormConfigFilter;
 use Magein\createForm\library\FormConfig;
@@ -45,23 +46,31 @@ class CheckboxConfig extends FormConfig
     {
         parent::init($data, $filter);
 
-        $formConfigFilter = new FormConfigFilter();
+        /**
+         * @var FormConfigFilter $filter
+         */
+        $result = $filter->options($this->options);
 
-        return $formConfigFilter->options($this->options);
+        return $result;
 
     }
 
     /**
      * @param string $value
+     * @param bool $checkLength
      * @return bool
      */
-    public function setValue($value)
+    public function setValue($value, $checkLength)
     {
-        parent::setValue($value);
+        parent::setValue($value, $checkLength);
 
         if ($this->value) {
 
+            /**
+             * 值如果包含逗号等特殊符号，使用字符串分隔的方法会不准确，所以使用数组比较准确
+             */
             if (!is_array($this->value)) {
+                $this->setError(FormErrorConstant::FORM_DATA_IS_ARRAY, $this->title);
                 return false;
             }
 
@@ -72,6 +81,7 @@ class CheckboxConfig extends FormConfig
 
             foreach ($this->value as $value) {
                 if (!in_array($value, $names)) {
+                    $this->setError(FormErrorConstant::FORM_DATA_NOT_MATCH, $this->title);
                     return false;
                 }
             }
