@@ -45,12 +45,14 @@ class RadioConfig extends FormConfig
      */
     public function init(array $data, Filter $filter = null)
     {
-        parent::init($data, $filter);
+        $result = parent::init($data, $filter);
 
-        /**
-         * @var FormConfigFilter $filter
-         */
-        $result = $filter->options($this->options);
+        if ($result) {
+            /**
+             * @var FormConfigFilter $filter
+             */
+            $result = $filter->options($this->options);
+        }
 
         return $result;
     }

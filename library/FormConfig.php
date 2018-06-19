@@ -190,7 +190,8 @@ class FormConfig
                             $this->$property = $param;
                         }
                     } else {
-                        $this->setError($filter->getCode(), isset($data['title']) ? $data['title'] : $data['name']);
+                        $errorConfig = isset($data['title']) && !empty($data['title']) ? $data['title'] : $data['name'];
+                        $this->setError($filter->getCode(), $errorConfig);
                         return false;
                     }
                 }

@@ -34,7 +34,8 @@ trait FormError
         return [
             FormErrorConstant::FORM_CONFIG_CLASS_ERROR => '注册表单项处理类需要继承 FormConfig 类',
             FormErrorConstant::FORM_CONFIG_CLASS_NOT_FOUND => '表单项处理类找不到，需要传递一个 class 值',
-            FormErrorConstant::FORM_CONFIG_DECODE_FAIL => '表单项解码失败，需要传递一个 json 类型的字符串',
+            FormErrorConstant::FORM_CONFIG_NAME_NOT_UNIQUE => '表单项的 name 值不能重复',
+            FormErrorConstant::FORM_CONFIG_DECODE_FAIL => '表单项解码失败，需要传递一个 json 类型的字符串,对象最后一项不含","',
             FormErrorConstant::FORM_CONFIG_FORMAT_ERROR => '表单项中存在不是对象的项或者项为空',
             FormErrorConstant::FORM_CONFIG_TITLE_ERROR => '表单项中 title 是必须要声明的',
             FormErrorConstant::FORM_CONFIG_NAME_ERROR => '表单项中 name 值只能是数字，字母，下划线组合，可以为空',
@@ -52,9 +53,9 @@ trait FormError
     }
 
     /**
-     * @param integer $code
+     * @param integer $code 错误代码，可用来获取错误信息
      * @param string $errorConfig 出错的配置项,可以是 title name 或者 第一项，可以更准确的定位到错误信息
-     * @param string $error
+     * @param string $error 自定义错误信息，错误代码兑换不到的时候则返回此信息
      */
     public function setError($code, $errorConfig = null, $error = null)
     {
@@ -73,11 +74,17 @@ trait FormError
         return isset($initErrors[$this->code]) ? $initErrors[$this->code] : $this->error;
     }
 
+    /**
+     * @return int
+     */
     public function getCode()
     {
         return $this->code;
     }
 
+    /**
+     * @return string
+     */
     public function getErrorConfig()
     {
         return $this->errorConfig;

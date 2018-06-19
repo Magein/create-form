@@ -10,6 +10,8 @@ class FormErrorConstant extends Constant
 
     const FORM_CONFIG_CLASS_NOT_FOUND = 10101;
 
+    const FORM_CONFIG_NAME_NOT_UNIQUE = 10102;
+
     const FORM_CONFIG_DECODE_FAIL = 10102;
 
     const FORM_CONFIG_FORMAT_ERROR = 10103;

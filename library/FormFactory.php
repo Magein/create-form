@@ -108,7 +108,7 @@ class FormFactory
 
         foreach ($config as $key => $item) {
 
-            $errorKey = '第' . $key . '项';
+            $errorKey = '第' . ($key + 1) . '项';
 
             if (!is_array($item) || empty($item)) {
                 $this->setError(FormErrorConstant::FORM_CONFIG_FORMAT_ERROR, $errorKey);
@@ -133,6 +133,11 @@ class FormFactory
             };
 
             $formConfig[$instance->getName()] = $instance;
+        }
+
+        if (count($formConfig) != count($config)) {
+            $this->setError(FormErrorConstant::FORM_CONFIG_NAME_NOT_UNIQUE);
+            return [];
         }
 
         return $formConfig;
