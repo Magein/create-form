@@ -6,7 +6,6 @@ use Magein\createForm\library\constant\FormErrorConstant;
 
 trait FormError
 {
-
     /**
      * 错误代码
      * @var integer
@@ -32,7 +31,7 @@ trait FormError
     public function initErrors()
     {
         return [
-            FormErrorConstant::FORM_CONFIG_CLASS_ERROR => '注册表单项处理类需要继承 FormConfig 类',
+            FormErrorConstant::FORM_CONFIG_CLASS_ERROR => '表单项处理类需要注册并且需要继承 FormConfig 类',
             FormErrorConstant::FORM_CONFIG_CLASS_NOT_FOUND => '表单项处理类找不到，需要传递一个 class 值',
             FormErrorConstant::FORM_CONFIG_NAME_NOT_UNIQUE => '表单项的 name 值不能重复',
             FormErrorConstant::FORM_CONFIG_DECODE_FAIL => '表单项解码失败，需要传递一个 json 类型的字符串,对象最后一项不含","',

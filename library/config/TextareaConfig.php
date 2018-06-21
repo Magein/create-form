@@ -12,15 +12,4 @@ class TextareaConfig extends FormConfig
      */
     protected $type = FormConfigTypeConstant::TYPE_TEXTAREA;
 
-    protected $length = [0, 65535];
-
-    /**
-     * TextareaConfig constructor.
-     * @param array $data
-     */
-    public function __construct(array $data = [])
-    {
-        parent::__construct($data);
-    }
-
 }

@@ -6,16 +6,22 @@ namespace Magein\createForm\library\constant;
 
 class FormErrorConstant extends Constant
 {
+    /**
+     * 表单配置错误代码
+     */
     const FORM_CONFIG_CLASS_ERROR = 10100;
 
     const FORM_CONFIG_CLASS_NOT_FOUND = 10101;
 
     const FORM_CONFIG_NAME_NOT_UNIQUE = 10102;
 
-    const FORM_CONFIG_DECODE_FAIL = 10102;
+    const FORM_CONFIG_DECODE_FAIL = 10103;
 
-    const FORM_CONFIG_FORMAT_ERROR = 10103;
+    const FORM_CONFIG_FORMAT_ERROR = 10104;
 
+    /**
+     * 表单配置项错误代码
+     */
     const FORM_CONFIG_TITLE_ERROR = 10201;
 
     const FORM_CONFIG_NAME_ERROR = 10202;
@@ -30,6 +36,9 @@ class FormErrorConstant extends Constant
 
     const FORM_CONFIG_LENGTH_PARAM_ERROR = 10207;
 
+    /**
+     * 表单收集的数据错误代码
+     */
     const FORM_DATA_REQUIRED = 10301;
 
     const FORM_DATA_LENGTH_ERROR = 10302;

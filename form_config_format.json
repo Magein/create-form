@@ -5,14 +5,14 @@
     "class": "TextConfig",
     "name": "e901n719",
     "required": "1",
-    "value": "",
+    "value": "12365241",
     "placeholder": "请输入姓名",
     "description": "请输入真实姓名",
     "message": "姓名不能为空",
     "disabled": false,
     "length": [
       1,
-      2
+      10
     ]
   },
   {
@@ -83,7 +83,7 @@
     "title": "简介",
     "type": "textarea",
     "class": "TextareaConfig",
-    "name": "e741n586",
+    "name": "e741n412",
     "required": "1",
     "value": "",
     "placeholder": "",
@@ -99,7 +99,7 @@
     "title": "爱好",
     "type": "checkbox",
     "class": "CheckboxConfig",
-    "name": "e741n586",
+    "name": "e741n596",
     "options": [
       {
         "name": "吃",

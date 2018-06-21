@@ -4,11 +4,8 @@ namespace Magein\createForm\library\config;
 
 use Magein\createForm\library\constant\FormConfigTypeConstant;
 use Magein\createForm\library\constant\FormErrorConstant;
-use Magein\createForm\library\filter\Filter;
-use Magein\createForm\library\filter\FormConfigFilter;
-use Magein\createForm\library\FormConfig;
 
-class CheckboxConfig extends FormConfig
+class CheckboxConfig extends SelectConfig
 {
     /**
      * @var string
@@ -16,57 +13,24 @@ class CheckboxConfig extends FormConfig
     protected $type = FormConfigTypeConstant::TYPE_CHECKBOX;
 
     /**
-     * CheckboxConfig constructor.
-     * @param array $data
-     */
-    public function __construct(array $data = [])
-    {
-        parent::__construct($data);
-    }
-
-    /**
-     * @var array
-     */
-    protected $options = [];
-
-    /**
-     * @return array
-     */
-    public function getOptions()
-    {
-        return $this->options;
-    }
-
-    /**
-     * @param array $data
-     * @param Filter|null $filter
-     * @return mixed
-     */
-    public function init(array $data, Filter $filter = null)
-    {
-        $result = parent::init($data, $filter);
-
-        if ($result) {
-            /**
-             * @var FormConfigFilter $filter
-             */
-            $result = $filter->options($this->options);
-        }
-
-        return $result;
-
-    }
-
-    /**
      * @param string $value
-     * @param bool $checkLength
+     * @param bool $isInit
      * @return bool
      */
-    public function setValue($value, $checkLength)
+    public function setValue($value, $isInit = false)
     {
-        parent::setValue($value, $checkLength);
 
-        if ($this->value) {
+        /**
+         * 这里不要执行父类的 setValue() 父类是集成 SelectConfig 他们验证的方式不一样，只需要重新调用一遍 验证必填，长度的方法即可
+         */
+
+        $this->value = $value;
+
+        if (false === $this->checkRequired($value, $isInit) || false === $this->checkLength($value)) {
+            return false;
+        }
+
+        if (false === $isInit) {
 
             /**
              * 值如果包含逗号等特殊符号，使用字符串分隔的方法会不准确，所以使用数组比较准确

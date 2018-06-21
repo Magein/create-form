@@ -10,17 +10,11 @@ use Magein\createForm\library\config\TextareaConfig;
 use Magein\createForm\library\config\TextConfig;
 use Magein\createForm\library\constant\FormConfigClassConstant;
 use Magein\createForm\library\constant\FormErrorConstant;
-use Magein\createForm\library\filter\Filter;
-use Magein\createForm\library\filter\FormConfigFilter;
 
 class FormFactory
 {
-    use FormError;
 
-    /**
-     * @var Filter
-     */
-    private $filterClass;
+    use FormError;
 
     /**
      * @var array
@@ -33,9 +27,11 @@ class FormFactory
     public function __construct()
     {
         $this->initFormConfig();
-        $this->setFilterClass(new FormConfigFilter());
     }
 
+    /**
+     * 初始化表单配置
+     */
     private function initFormConfig()
     {
         $this->formConfigClass[FormConfigClassConstant::TYPE_TEXT_CLASS] = TextConfig::class;
@@ -47,24 +43,9 @@ class FormFactory
     }
 
     /**
-     * @param Filter $filterClass
-     */
-    public function setFilterClass(Filter $filterClass)
-    {
-        $this->filterClass = $filterClass;
-    }
-
-    /**
-     * @return Filter
-     */
-    public function getFilterClass()
-    {
-        return $this->filterClass;
-    }
-
-    /**
-     * @param $formConfigClass
-     * @param null $key
+     * 注册表单配置项处理类
+     * @param string $formConfigClass static::class的结果
+     * @param string|null $key 指定的键,不传递则自动获取，这里与 FormConfig 中的 class 属性对应（即前段传递的json数据中必须指定的表单项处理类名称）
      * @return bool
      */
     public function registerFormConfig($formConfigClass, $key = null)
@@ -115,36 +96,40 @@ class FormFactory
                 return [];
             }
 
-            if (!isset($item['class']) || !isset($this->formConfigClass[$item['class']])) {
-                $this->setError(FormErrorConstant::FORM_CONFIG_CLASS_ERROR, $errorKey);
+            if (!isset($item['class'])) {
+                $this->setError(FormErrorConstant::FORM_CONFIG_CLASS_NOT_FOUND, $errorKey);
                 return [];
             }
 
-            $class = isset($item['class']) ? $item['class'] : null;
+            if (!isset($this->formConfigClass[$item['class']])) {
+                $this->setError(FormErrorConstant::FORM_CONFIG_CLASS_ERROR, $item['class']);
+                return [];
+            }
 
             /**
              * @var FormConfig $instance
              */
-            $class = $this->formConfigClass[$class];
+            $class = $this->formConfigClass[$item['class']];
             $instance = new $class();
-            if (!$instance->init($item, $this->filterClass)) {
+
+            if (!$instance->init($item)) {
                 $this->setError($instance->getCode(), $instance->getErrorConfig(), $instance->getError());
                 return [];
             };
 
-            $formConfig[$instance->getName()] = $instance;
-        }
+            if (isset($formConfig[$instance->getName()])) {
+                $this->setError(FormErrorConstant::FORM_CONFIG_NAME_NOT_UNIQUE, $instance->getName());
+                return [];
+            }
 
-        if (count($formConfig) != count($config)) {
-            $this->setError(FormErrorConstant::FORM_CONFIG_NAME_NOT_UNIQUE);
-            return [];
+            $formConfig[$instance->getName()] = $instance;
         }
 
         return $formConfig;
     }
 
     /**
-     * 把表单项转化为数组（调用makeFormConfig()方法后的数据），数组中的每一表单项都是一个对象
+     * 把表单项转化为数组（调用 makeFormConfig() 方法后的数据），数组中的每一表单项都是一个对象
      * @param array $formConfig
      * @return array
      */
@@ -173,7 +158,7 @@ class FormFactory
     }
 
     /**
-     * 把表单项转化为json（调用makeFormConfig()方法后的数据），数组中的每一表单项都是一个对象
+     * 把表单项转化为json（调用 makeFormConfig() 方法后的数据），数组中的每一表单项都是一个对象
      * @param array $formConfig
      * @return null|string
      */
@@ -191,11 +176,10 @@ class FormFactory
     /**
      * 检测提交的表单数据是否正确
      * @param array $formData ["name":"value","name":"value"]形式的数组，name对应的是表单配置中的每一项的name值
-     * @param array $formConfig 数组的每一项都是一个对象（调用makeFormConfig()方法后返回的数据）
-     * @param bool $checkLength
+     * @param array $formConfig 数组的每一项都是一个对象（调用 makeFormConfig() 方法后返回的数据）
      * @return array
      */
-    public function checkFormData(array $formData, array $formConfig, $checkLength = false)
+    public function checkFormData(array $formData, array $formConfig)
     {
         foreach ($formConfig as $key => $config) {
             /**
@@ -205,7 +189,7 @@ class FormFactory
                 try {
                     $name = $config->getName();
                     $value = isset($formData[$name]) ? $formData[$name] : null;
-                    $result = $config->setValue($value, $checkLength);
+                    $result = $config->setValue($value);
                     if (false === $result) {
                         $this->setError($config->getCode(), $config->getErrorConfig());
                         return [];
@@ -225,7 +209,7 @@ class FormFactory
     }
 
     /**
-     * 获取表单配置项中的值，这里是表单项是调用checkFormData()方法后返回的数组(每一项都调用了setValue)
+     * 获取表单配置项中的值，这里是表单项是调用 checkFormData() 方法后返回的数组(每一项都调用了setValue)
      * @param array $formConfig
      * @return array
      */
@@ -254,7 +238,7 @@ class FormFactory
     }
 
     /**
-     * 获取表单项的标题（调用了makeFormConfig后返回的数组）
+     * 获取表单项的标题（调用了 makeFormConfig() 后返回的数组）
      * @param array $formConfig
      * @return array
      */

@@ -3,87 +3,21 @@
 namespace Magein\createForm\library\config;
 
 use Magein\createForm\library\constant\FormConfigTypeConstant;
-use Magein\createForm\library\constant\FormErrorConstant;
-use Magein\createForm\library\filter\Filter;
-use Magein\createForm\library\filter\FormConfigFilter;
-use Magein\createForm\library\FormConfig;
 
-class RadioConfig extends FormConfig
+/**
+ * Class RadioConfig
+ * @package Magein\createForm\library\config
+ *
+ *  继承 SelectConfig 原因是：
+ *      radio 和 select 从收集数据的结果来看是一样的， 都要求值在可选列表中只是渲染的方式不一样而已
+ *      区别在于渲染的时候 可选值(即options参数) 如果较少选用radio ，如果 可选值 比较多使用 select
+ *      移动端偏向于使用 select 多一点
+ */
+class RadioConfig extends SelectConfig
 {
     /**
      * @var string
      */
     protected $type = FormConfigTypeConstant::TYPE_RADIO;
 
-    /**
-     * RadioConfig constructor.
-     * @param array $data
-     */
-    public function __construct(array $data = [])
-    {
-        parent::__construct($data);
-
-    }
-
-    /**
-     * @var array
-     */
-    protected $options = [];
-
-    /**
-     * @return array
-     */
-    public function getOptions()
-    {
-        return $this->options;
-    }
-
-    /**
-     * @param array $data
-     * @param Filter|null $filter
-     * @return mixed
-     */
-    public function init(array $data, Filter $filter = null)
-    {
-        $result = parent::init($data, $filter);
-
-        if ($result) {
-            /**
-             * @var FormConfigFilter $filter
-             */
-            $result = $filter->options($this->options);
-        }
-
-        return $result;
-    }
-
-    /**
-     * @param string $value
-     * @param bool $checkLength
-     * @return bool
-     */
-    public function setValue($value, $checkLength)
-    {
-        parent::setValue($value, $checkLength);
-
-        if ($this->value) {
-
-            if (!is_string($this->value) && !is_int($this->value)) {
-                $this->setError(FormErrorConstant::FORM_DATA_IS_STRING, $this->title);
-                return false;
-            }
-
-            $names = [];
-            foreach ($this->options as $option) {
-                $names[] = $option['name'];
-            }
-
-            if (!in_array($this->value, $names)) {
-                $this->setError(FormErrorConstant::FORM_DATA_NOT_MATCH, $this->title);
-                return false;
-            }
-        }
-
-        return true;
-    }
 }
